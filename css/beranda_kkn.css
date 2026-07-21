@@ -1,0 +1,367 @@
+/* Pengaturan Warna: Biru Lebih Tua & Aksen Emas/Kuning */
+:root {
+    --bg-darkest: #040d1a; /* Latar belakang paling gelap */
+    --bg-card: #0a172a;    /* Biru tua untuk kartu */
+    --border-color: #1e293b;
+    --accent-gold: #eab308; /* Warna aksen mirip web Heritage */
+    --accent-blue: #2563eb;
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--bg-darkest);
+    color: var(--text-main);
+    line-height: 1.6;
+    overflow-x: hidden;
+}
+
+/* --- NAVBAR STYLES (Mengikuti referensi Heritage) --- */
+.navbar {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    background-color: rgba(4, 13, 26, 0.95);
+    backdrop-filter: blur(10px);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 40px;
+    z-index: 1000;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.nav-brand {
+    display: flex;
+    flex-direction: column;
+}
+
+.nav-title {
+    font-size: 1.5rem;
+    font-weight: 800;
+    letter-spacing: 2px;
+    color: #ffffff;
+    line-height: 1;
+}
+
+.nav-subtitle {
+    font-size: 0.75rem;
+    color: var(--accent-gold);
+    letter-spacing: 1px;
+    font-weight: bold;
+    margin-top: 4px;
+}
+
+.nav-links {
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 30px;
+}
+
+.nav-links a {
+    text-decoration: none;
+    color: var(--text-muted);
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: color 0.3s;
+}
+
+.nav-links a:hover, .nav-links a.active {
+    color: var(--accent-gold);
+    border-bottom: 2px solid var(--accent-gold);
+    padding-bottom: 5px;
+}
+
+.btn-nav-peta {
+    border: 1px solid var(--accent-gold);
+    padding: 8px 20px !important;
+    border-radius: 30px;
+    color: var(--accent-gold) !important;
+    border-bottom: none !important;
+}
+
+.btn-nav-peta:hover {
+    background-color: var(--accent-gold);
+    color: var(--bg-darkest) !important;
+}
+
+/* --- HERO SECTION --- */
+.header {
+    height: 80vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 0 20px;
+    margin-top: 60px;
+    background: radial-gradient(circle at center, #0a172a 0%, var(--bg-darkest) 100%);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.hero-content h1 {
+    font-size: 3.5rem;
+    letter-spacing: 3px;
+    margin-bottom: 10px;
+}
+
+.hero-content h2 {
+    font-size: 1.5rem;
+    color: var(--text-muted);
+    margin-bottom: 20px;
+}
+
+.hero-content p {
+    max-width: 600px;
+    margin: 0 auto 30px;
+    color: var(--text-muted);
+}
+
+.btn-utama {
+    display: inline-block;
+    background-color: var(--accent-blue);
+    color: #fff;
+    padding: 12px 35px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.btn-utama:hover {
+    background-color: #1d4ed8;
+    box-shadow: 0 0 15px rgba(37, 99, 235, 0.5);
+}
+
+/* --- CONTAINER & SECTIONS --- */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.section-container {
+    padding: 80px 0 40px;
+}
+
+.section-title {
+    text-align: center;
+    font-size: 2.2rem;
+    margin-bottom: 10px;
+    letter-spacing: 1px;
+}
+
+.section-desc {
+    text-align: center;
+    color: var(--text-muted);
+    max-width: 700px;
+    margin: 0 auto 40px;
+}
+
+/* --- GRID CARDS (Fasilitas & UMKM) --- */
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+}
+
+.card {
+    background-color: var(--bg-card);
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+    border-color: var(--accent-gold);
+}
+
+.card-img img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+
+.card-content {
+    padding: 20px;
+}
+
+.card-content h3 {
+    color: var(--accent-gold);
+    margin-bottom: 10px;
+}
+
+/* --- GALLERY SECTION (Gambar Besar + Kecil) --- */
+.gallery-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.gallery-large {
+    position: relative;
+    width: 100%;
+    height: 450px;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+}
+
+.gallery-large img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.gallery-large:hover img {
+    transform: scale(1.05);
+}
+
+.gallery-caption {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    padding: 20px;
+    background: linear-gradient(transparent, rgba(0,0,0,0.9));
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--accent-gold);
+}
+
+.gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+}
+
+.gallery-item {
+    height: 200px;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+}
+
+.gallery-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: 0.3s;
+}
+
+.gallery-item:hover img {
+    transform: scale(1.1);
+}
+
+/* Responsif untuk Galeri */
+@media (max-width: 900px) {
+    .gallery-grid { grid-template-columns: repeat(2, 1fr); }
+    .gallery-large { height: 300px; }
+    .nav-links { display: none; /* Sederhana untuk mobile */ }
+}
+
+/* --- PROFIL TIM KKN --- */
+.tim-kkn {
+    text-align: center;
+    background-color: var(--bg-card);
+    padding: 50px 20px;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    margin: 80px 0;
+}
+
+.tim-kkn img {
+    width: 100%;
+    max-width: 600px;
+    height: 350px;
+    object-fit: cover;
+    border-radius: 10px;
+    margin-bottom: 25px;
+}
+
+.tim-kkn h3 {
+    font-size: 2rem;
+    color: var(--accent-gold);
+    margin-bottom: 15px;
+}
+
+/* --- FOOTER --- */
+footer {
+    text-align: center;
+    padding: 25px;
+    background-color: #020610;
+    color: var(--text-muted);
+    border-top: 1px solid var(--border-color);
+}
+
+/* =========================================
+   ANIMASI SCROLL (MUNCUL SAAT DI-SCROLL)
+========================================= */
+.scroll-reveal {
+    opacity: 0;
+    transform: translateY(60px);
+    transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+}
+
+.scroll-reveal.active {
+    opacity: 1;
+    transform: translateY(0);
+}
+/* --- SLIDER TIM KKN DENGAN FRAME --- */
+.slider-kkn {
+    position: relative;
+    width: 100%;
+    max-width: 1200px;
+    height: 500px; 
+    margin: 0 auto 40px;
+    border-radius: 8px;
+    overflow: hidden;
+    /* Frame emas yang elegan */
+    border: 2px solid var(--accent-gold);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+}
+
+.slide {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transition: opacity 1.5s ease-in-out;
+}
+
+.slide.active {
+    opacity: 1;
+}
+
+.slide img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.header {
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 0 20px;
+    
+    /* INI ADALAH KODE UNTUK MEMUNCULKAN GAMBAR LATAR BELAKANG */
+    /* Pastikan nama file di dalam url('') sama persis dengan nama gambar Anda */
+    background: linear-gradient(rgba(4, 13, 26, 0.8), rgba(4, 13, 26, 0.95)), url('Screenshot 2026-07-09 135545.jpg') no-repeat center center/cover;
+    
+    border-bottom: 1px solid var(--border-color);
+}

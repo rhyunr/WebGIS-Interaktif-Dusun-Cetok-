@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebGIS Dusun Cetok</title>
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-darkest: #040d1a;  
+            --bg-card: #0a172a;     
+            --border-color: #1e293b;
+            --accent-gold: #eab308; 
+            --accent-hover: #ca8a04;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; scroll-behavior: smooth; }
+
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg-darkest); color: var(--text-main); line-height: 1.6; overflow-x: hidden; }
+
+        .navbar { position: fixed; top: 0; width: 100%; background-color: rgba(4, 13, 26, 0.95); backdrop-filter: blur(10px); display: flex; justify-content: space-between; align-items: center; padding: 20px 50px; z-index: 1000; border-bottom: 1px solid var(--border-color); }
+        .nav-brand h1 { font-size: 1.6rem; font-weight: 900; letter-spacing: 2px; color: #ffffff; text-transform: uppercase; }
+        .nav-links { list-style: none; display: flex; align-items: center; gap: 30px; }
+        .nav-links a { text-decoration: none; color: var(--text-muted); font-weight: 600; font-size: 0.95rem; transition: color 0.3s; padding-bottom: 5px; border-bottom: 2px solid transparent; }
+        .nav-links a:hover, .nav-links a.active { color: var(--accent-gold); border-bottom: 2px solid var(--accent-gold); }
+
+        .header { height: 100vh; display: flex; align-items: center; justify-content: center; text-align: center; padding: 0 20px; background: linear-gradient(rgba(4, 13, 26, 0.8), rgba(4, 13, 26, 0.95)), url('UTAMA.png') no-repeat center center/cover; border-bottom: 1px solid var(--border-color); }
+        .hero-content { display: flex; flex-direction: column; align-items: center; margin-top: 60px; }
+        .hero-subtitle-top { font-size: 1rem; color: var(--accent-gold); letter-spacing: 4px; margin-bottom: 10px; font-weight: bold; }
+        .hero-content h1 { font-size: 4rem; letter-spacing: 4px; margin-bottom: 5px; text-transform: uppercase; color: var(--text-main); line-height: 1.1; text-shadow: 2px 4px 10px rgba(0,0,0,0.5); }
+        .hero-content h2 { font-size: 1.5rem; color: var(--text-main); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 20px; text-shadow: 1px 2px 8px rgba(0,0,0,0.5); }
+        .hero-slogan { font-size: 0.9rem; color: #cbd5e1; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 35px; font-weight: 500; }
+        
+        /* Modifikasi Tombol Sesuai Tangkapan Layar (Kuning Solid) */
+        .btn-jelajah-hero { display: inline-block; background-color: var(--accent-gold); color: var(--bg-darkest); padding: 15px 40px; font-size: 1.05rem; font-weight: bold; letter-spacing: 2px; border-radius: 30px; text-decoration: none; transition: all 0.3s ease; border: none; }
+        .btn-jelajah-hero:hover { background-color: var(--accent-hover); box-shadow: 0 0 20px rgba(234, 179, 8, 0.5); transform: translateY(-3px); }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        .section-container { padding: 40px 0 0px; }
+        .section-title { text-align: center; font-size: 2rem; color: var(--accent-gold); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 5px; }
+        .title-separator { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 15px; }
+        .title-separator::before, .title-separator::after { content: ""; height: 1px; width: 50px; background-color: var(--accent-gold); }
+        .title-separator .dot { width: 6px; height: 6px; background-color: var(--accent-gold); border-radius: 50%; }
+        .section-desc-small { text-align: center; color: var(--text-muted); max-width: 800px; margin: 0 auto 15px; font-size: 0.9rem; font-weight: normal; }
+
+        .profil-dusun-box { text-align: center; margin-bottom: 10px; padding: 35px; background-color: var(--bg-card); border-radius: 12px; border-left: 5px solid var(--accent-gold); box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        .profil-dusun-box p { max-width: 950px; margin: 0 auto; color: var(--text-main); font-size: 1.05rem; line-height: 1.8; text-align: justify; }
+
+        .gallery-wrapper { display: flex; flex-direction: column; gap: 20px; margin-bottom: 10px; }
+        .gallery-large { width: 100%; height: 500px; border-radius: 8px; overflow: hidden; border: 1px solid var(--accent-gold); }
+        .gallery-large img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; }
+        .gallery-large:hover img { transform: scale(1.02); }
+        .gallery-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+        .gallery-item { height: 350px; border-radius: 8px; overflow: hidden; border: 1px solid var(--border-color); }
+        .gallery-item img { width: 100%; height: 100%; object-fit: cover; transition: 0.3s; }
+        .gallery-item:hover img { transform: scale(1.1); border: 1px solid var(--accent-gold);}
+
+        .video-wrapper { width: 100%; margin: 0 auto; border-radius: 12px; overflow: hidden; border: 2px solid var(--accent-gold); box-shadow: 0 10px 30px rgba(0,0,0,0.5); background-color: var(--bg-darkest); }
+        .video-wrapper video { width: 100%; height: auto; display: block; }
+
+        .map-wrapper { width: 100%; height: 550px; border-radius: 12px; overflow: hidden; border: 2px solid var(--accent-gold); box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 1; margin-bottom: 10px; }
+        .leaflet-popup-content-wrapper { background: var(--bg-card); color: var(--text-main); border: 1px solid var(--accent-gold); }
+        .leaflet-popup-tip { background: var(--bg-card); border: 1px solid var(--accent-gold); }
+        .leaflet-popup-content b { color: var(--accent-gold); }
+
+        .tim-kkn-subtitle { text-align: center; font-size: 1.3rem; color: var(--text-main); margin-bottom: 10px; letter-spacing: 2px; }
+        .tentang-box { text-align: center; margin-bottom: 20px; }
+        .tentang-box p { max-width: 950px; margin: 0 auto; color: var(--text-main); font-size: 1.05rem; line-height: 1.8; padding: 30px; background-color: var(--bg-card); border-radius: 12px; border: 1px solid var(--accent-gold); }
+        
+        .profil-individu { display: flex; flex-direction: column; align-items: center; margin-top: 20px; margin-bottom: 30px; }
+        .profil-individu img { width: 180px; height: 180px; border-radius: 50%; object-fit: cover; border: 3px solid var(--accent-gold); margin-bottom: 15px; }
+        .profil-individu h4 { font-size: 1.6rem; color: var(--text-main); margin-bottom: 5px; }
+        .profil-individu span.role { color: var(--accent-gold); font-weight: bold; letter-spacing: 2px; text-transform: uppercase; font-size: 0.9rem; margin-bottom: 10px; }
+
+        .kegiatan-text-container { max-width: 900px; margin: 0 auto 30px; background-color: var(--bg-card); padding: 35px; border-radius: 12px; border: 1px solid var(--border-color); }
+        .kegiatan-list { list-style: none; padding: 0; margin: 0; }
+        .kegiatan-list li { font-size: 1.05rem; color: var(--text-main); margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px dashed var(--border-color); display: flex; align-items: center; gap: 15px; }
+        .kegiatan-list li:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+        .kegiatan-list li .angka { color: var(--accent-gold); font-weight: 900; font-size: 1.2rem; min-width: 30px; }
+
+        .social-links { display: flex; justify-content: center; gap: 20px; margin-top: 20px; margin-bottom: 50px; flex-wrap: wrap; }
+        .btn-social { display: flex; align-items: center; justify-content: center; padding: 10px 25px; border-radius: 30px; font-weight: bold; text-decoration: none; letter-spacing: 1px; transition: all 0.3s ease; font-size: 1rem; border: 2px solid; }
+        .btn-social i { margin-right: 10px; font-size: 1.3rem; }
+        .btn-social.ig { color: #E1306C; border-color: #E1306C; background-color: transparent; }
+        .btn-social.ig:hover { background-color: #E1306C; color: #ffffff; box-shadow: 0 0 15px rgba(225, 48, 108, 0.4); }
+        .btn-social.tiktok { color: #00f2fe; border-color: #00f2fe; background-color: transparent; }
+        .btn-social.tiktok:hover { background-color: #00f2fe; color: #040d1a; box-shadow: 0 0 15px rgba(0, 242, 254, 0.4); }
+
+        footer { text-align: center; padding: 25px; background-color: #020610; color: var(--text-muted); border-top: 1px solid var(--border-color); font-size: 0.9rem;}
+
+        .scroll-reveal { opacity: 0; transform: translateY(40px); transition: opacity 0.8s ease-out, transform 0.8s ease-out; }
+        .scroll-reveal.active { opacity: 1; transform: translateY(0); }
+
+        @media (max-width: 900px) {
+            .gallery-grid { grid-template-columns: 1fr; }
+            .gallery-item { height: 250px; }
+            .gallery-large { height: 300px; }
+            .nav-links { display: none; }
+            .hero-content h1 { font-size: 2.5rem; }
+            .hero-content h2 { font-size: 1.2rem; }
+            .map-wrapper { height: 400px; }
+            .video-wrapper { padding: 0; border: none; background: none;}
+            .kegiatan-text-container { padding: 25px; }
+            .profil-dusun-box { padding: 25px; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="nav-brand">
+            <h1>DUSUN CETOK</h1>
+        </div>
+        <ul class="nav-links">
+            <li><a href="peta.html">Peta Interaktif</a></li>
+            <li><a href="#profil">Profil Dusun</a></li>
+            <li><a href="#galeri">Galeri & Video</a></li>
+            <li><a href="#fasilitas">Fasilitas</a></li>
+            <li><a href="#umkm">UMKM</a></li>
+            <li><a href="#tim-pengembang">Tim Pengembang</a></li>
+        </ul>
+    </nav>
+
+    <header class="header scroll-reveal">
+        <div class="hero-content">
+            <div class="hero-subtitle-top">WEBGIS INTERAKTIF</div>
+            <h1>DUSUN CETOK</h1>
+            <h2>DESA BATURAN</h2>
+            
+            <div class="hero-slogan">MENELUSURI DUSUN CETOK • FASILITAS UMUM • UMKM • KEINDAHAN DUSUN</div>
+            
+            <a href="peta.html" class="btn-jelajah-hero">
+                JELAJAHI PETA DUSUN CETOK &nbsp; <i class="fas fa-arrow-right"></i>
+            </a>
+        </div>
+    </header>
+
+    <div class="container">
+
+        <section id="profil" class="section-container">
+            <h2 class="section-title scroll-reveal">SEKILAS DUSUN CETOK</h2>
+            <div class="title-separator scroll-reveal"><div class="dot"></div></div>
+            <div class="profil-dusun-box scroll-reveal">
+                <p>
+                    Dusun Cetok merupakan salah satu padukuhan yang terletak di wilayah Desa Baturan, dengan kekayaan potensi alam dan kerukunan warga yang terus terjaga. Lingkungan yang asri dipadukan dengan pesatnya perkembangan Usaha Mikro Kecil Menengah (UMKM) menjadikan Dusun Cetok memiliki dinamika perekonomian yang mandiri. Melalui sistem pemetaan digital (WebGIS) ini, kami berupaya menyajikan informasi geografis yang komprehensif, mulai dari letak fasilitas pelayanan masyarakat, hingga pemetaan potensi ekonomi warga, guna mendukung kemajuan infrastruktur dan kesejahteraan masyarakat Dusun Cetok ke depannya.
+                </p>
+            </div>
+        </section>
+        
+        <section id="galeri" class="section-container">
+            <h2 class="section-title scroll-reveal">GALERI DUSUN CETOK</h2>
+            <div class="title-separator scroll-reveal"><div class="dot"></div></div>
+            <p class="section-desc-small scroll-reveal">koleksi dokumentasi visual kegiatan dusun cetok</p>
+            <div class="gallery-wrapper">
+                <div class="gallery-large scroll-reveal"><img src="gambar_utama.png" alt="Gambar Utama"></div>
+                <div class="gallery-grid">
+                    <div class="gallery-item scroll-reveal"><img src="galeri1.png" alt="Galeri 1"></div>
+                    <div class="gallery-item scroll-reveal"><img src="galeri2.png" alt="Galeri 2"></div>
+                    <div class="gallery-item scroll-reveal"><img src="galeri3.png" alt="Galeri 3"></div>
+                    <div class="gallery-item scroll-reveal"><img src="galeri4.png" alt="Galeri 4"></div>
+                </div>
+            </div>
+        </section>
+
+        <section id="video-dokumentasi" class="section-container">
+            <h2 class="section-title scroll-reveal">VIDEO DOKUMENTASI</h2>
+            <div class="title-separator scroll-reveal"><div class="dot"></div></div>
+            <p class="section-desc-small scroll-reveal">Cuplikan kegiatan dan profil Dusun Cetok</p>
+            <div class="video-wrapper scroll-reveal">
+                <video controls preload="metadata"><source src="CETOKVIDEO.mp4" type="video/mp4">Maaf, browser Anda tidak mendukung pemutaran video.</video>
+            </div>
+        </section>
+
+        <section id="fasilitas" class="section-container">
+            <h2 class="section-title scroll-reveal">FASILITAS UMUM</h2>
+            <div class="title-separator scroll-reveal"><div class="dot"></div></div>
+            <p class="section-desc-small scroll-reveal">informasi persebaran fasilitas pelayanan masyarakat, sarana pendidikan, dan tempat ibadah di dusun cetok</p>
+            <div class="scroll-reveal"><div id="map-fasilitas" class="map-wrapper"></div></div>
+        </section>
+
+        <section id="umkm" class="section-container">
+            <h2 class="section-title scroll-reveal">SEBARAN UMKM</h2>
+            <div class="title-separator scroll-reveal"><div class="dot"></div></div>
+            <p class="section-desc-small scroll-reveal">mendukung roda perekonomian lokal melalui pemetaan lokasi usaha mikro, kecil, dan menengah milik warga</p>
+            <div class="scroll-reveal"><div id="map-umkm" class="map-wrapper"></div></div>
+        </section>
+
+        <section id="tim-pengembang" class="section-container">
+            <h2 class="section-title scroll-reveal">TIM PENGEMBANG</h2>
+            <div class="title-separator scroll-reveal"><div class="dot"></div></div>
+            <h3 class="tim-kkn-subtitle scroll-reveal">KKN 84.306</h3>
+            <div class="gallery-large scroll-reveal" style="margin-bottom: 30px; border: 2px solid var(--accent-gold); border-radius: 8px; overflow: hidden; padding: 5px; background-color: var(--bg-card);"><img src="fototim3.JPG" alt="Foto Tim KKN 84.306" style="width: 100%; height: 100%; object-fit: cover;"></div>
+            <div class="tentang-box scroll-reveal"><p>WebGIS (Web Geographic Information System) merupakan sistem informasi geografis berbasis web yang digunakan untuk menyajikan informasi spasial dalam bentuk peta digital yang dapat diakses secara interaktif melalui internet. WebGIS Dusun Cetok ini dibangun sebagai wujud nyata pengabdian kepada masyarakat. Platform digital ini dikembangkan secara khusus untuk mendokumentasikan, menyajikan, dan mempromosikan potensi lokal, sebaran fasilitas umum, serta geliat UMKM yang ada. Melalui digitalisasi pemetaan ini, diharapkan dapat memberikan kemudahan akses informasi bagi masyarakat luas, membantu perencanaan desa yang lebih terarah, dan pada akhirnya mampu mendorong peningkatan taraf ekonomi serta kesejahteraan warga setempat.</p></div>
+            <div class="profil-individu scroll-reveal"><img src="ayu.jpeg" alt="Foto Rahayu Nuraini"><h4>Rahayu Nuraini</h4><span class="role">WebGIS Development</span></div>
+
+            <h2 class="section-title scroll-reveal">KEGIATAN KKN 84.306</h2>
+            <div class="title-separator scroll-reveal"><div class="dot"></div></div>
+            <div class="kegiatan-text-container scroll-reveal">
+                <ul class="kegiatan-list">
+                    <li><span class="angka">1.</span> Kebun Keluarga Berkelanjutan: Pemanfaatan Barang Bekas & Budidaya Sayuran</li>
+                    <li><span class="angka">2.</span> Eksplorasi Permainan Tradisional</li>
+                    <li><span class="angka">3.</span> Pengenalan Prinsip Keselamatan & Kesehatan Kerja (K3)</li>
+                    <li><span class="angka">4.</span> Optimalisasi Instagram Bisnis Pelaku UMKM Desa Cetok</li>
+                    <li><span class="angka">5.</span> Edukasi Pencegahan Penipuan Digital</li>
+                    <li><span class="angka">6.</span> Sosialisasi Kualitas Air Sumur Warga Dusun Cetok</li>
+                    <li><span class="angka">7.</span> Pemetaan Sebaran Kualitas Air Tanah Dangkal</li>
+                </ul>
+            </div>
+
+            <div class="social-links scroll-reveal">
+                <a href="https://www.instagram.com/cetok_bercerita?igsh=b2R0Y2NseXJhbGI4" target="_blank" class="btn-social ig"><i class="fab fa-instagram"></i> Instagram KKN</a>
+                <a href="https://www.tiktok.com/@kknupnyk.84.306?_r=1&_t=ZS-981IWMy3yLJ" target="_blank" class="btn-social tiktok"><i class="fab fa-tiktok"></i> TikTok KKN</a>
+            </div>
+        </section>
+
+    </div>
+
+    <footer>
+        <p>&copy; 2026 WebGIS Dusun Cetok, Desa Baturan. Dibuat dengan dedikasi oleh Tim KKN 84.306 UPNYK.</p>
+    </footer>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Pesan alert ditambahkan di sini
+            alert("Cara penggunaan ideal menggunakan HP, nyalakan mode desktop dan landscape");
+
+            const mapFasilitas = L.map('map-fasilitas').setView([-7.753000, 110.548000], 16);
+            L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19, attribution: 'Tiles &copy; Esri' }).addTo(mapFasilitas);
+            const dataFasilitas = [{ nama: "1. Masjid Nurul Huda", lat: -7.754248550461454, lng: 110.54761860223867 }, { nama: "2. Bangsal Dusun Cetok", lat: -7.753701872464028, lng: 110.54714126435482 }, { nama: "3. TPA Nur Hidayah", lat: -7.7516393864289395, lng: 110.5492514401 }];
+            dataFasilitas.forEach(item => { const marker = L.marker([item.lat, item.lng]).addTo(mapFasilitas); marker.bindPopup(`<b>${item.nama}</b><br>Fasilitas Umum Dusun Cetok`); });
+
+            const mapUMKM = L.map('map-umkm').setView([-7.752600, 110.548700], 17);
+            L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19, attribution: 'Tiles &copy; Esri' }).addTo(mapUMKM);
+            const dataUMKM = [{ nama: "1. Gado-gado Busuji", lat: -7.752582, lng: 110.548936 }, { nama: "2. Warung Sayur Bu Sunarni", lat: -7.751498, lng: 110.548334 }, { nama: "3. Warung Seblak Clowy", lat: -7.751477, lng: 110.548531 }, { nama: "4. Warung Kelontong Ibu Maryam", lat: -7.754786, lng: 110.547219 }, { nama: "5. TB. Estu Berkah Keramik", lat: -7.751181, lng: 110.54904 }, { nama: "6. Toko Kelontong Bu Menik", lat: -7.751364, lng: 110.549233 }, { nama: "7. Kapten Plastik 350 & Frozen", lat: -7.752053, lng: 110.549202 }, { nama: "8. Toko Semangat dan Agen Pos", lat: -7.752461, lng: 110.548537 }, { nama: "9. Gito Roso Jenang Ayu", lat: -7.752697, lng: 110.548794 }, { nama: "10. Warung Jovanka", lat: -7.753054526, lng: 110.5480764 }, { nama: "11. Angkringan Mbledos", lat: -7.75337, lng: 110.548383 }, { nama: "12. Waroeng BENmoro", lat: -7.753197, lng: 110.549439 }, { nama: "13. Angkringan Gembros", lat: -7.753684, lng: 110.549837 }];
+            dataUMKM.forEach(item => { const marker = L.marker([item.lat, item.lng]).addTo(mapUMKM); marker.bindPopup(`<b>${item.nama}</b><br>Kategori: UMKM Dusun Cetok`); });
+
+            const revealElements = document.querySelectorAll('.scroll-reveal');
+            const revealObserver = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => { if (entry.isIntersecting) { entry.target.classList.add('active'); observer.unobserve(entry.target); } });
+            }, { root: null, rootMargin: '0px', threshold: 0.15 });
+            revealElements.forEach(el => { revealObserver.observe(el); });
+
+            setTimeout(() => { mapFasilitas.invalidateSize(); mapUMKM.invalidateSize(); }, 1000);
+        });
+    </script>
+</body>
+</html>

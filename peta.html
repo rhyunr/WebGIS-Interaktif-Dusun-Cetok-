@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Peta Interaktif - WebGIS Dusun Cetok</title>
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-darkest: #040d1a;  
+            --bg-card: #0a172a;     
+            --border-color: #1e293b;
+            --accent-gold: #eab308; 
+            --accent-hover: #ca8a04;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8; /* Warna abu kebiruan seperti di referensi */
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; scroll-behavior: smooth; }
+
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg-darkest); color: var(--text-main); line-height: 1.6; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+
+        /* NAVBAR */
+        .navbar { background-color: rgba(4, 13, 26, 0.95); backdrop-filter: blur(10px); display: flex; justify-content: space-between; align-items: center; padding: 10px 50px; z-index: 1000; border-bottom: 1px solid var(--border-color); }
+        .nav-brand { display: flex; flex-direction: column; }
+        .nav-brand h1 { font-size: 1.5rem; font-weight: 900; letter-spacing: 2px; color: #ffffff; text-transform: uppercase; line-height: 1.2; }
+        
+        /* GAYA MENU NAVIGASI (Disamakan persis dengan referensi Beranda) */
+        .nav-links { list-style: none; display: flex; align-items: center; margin: 0; gap: 30px; }
+        .nav-links a { 
+            text-decoration: none; 
+            color: var(--text-muted); /* Warna disamakan dengan referensi (Abu-abu kebiruan) */
+            font-weight: 600; 
+            font-size: 1.05rem; /* Besaran huruf disamakan agar pas */
+            transition: color 0.3s; 
+            padding-bottom: 5px; 
+            border-bottom: 2px solid transparent; 
+            display: flex; 
+            align-items: center; 
+            gap: 8px; 
+        }
+        .nav-links a:hover { color: var(--accent-gold); border-bottom: 2px solid var(--accent-gold); }
+
+        .main-container { display: flex; flex: 1; height: calc(100vh - 55px); }
+
+        /* SIDEBAR & KONTEN */
+        .sidebar { width: 360px; background-color: var(--bg-card); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; z-index: 500; }
+        .sidebar-tabs { display: flex; border-bottom: 1px solid var(--border-color); background-color: #020610; }
+        .tab-btn { flex: 1; background: none; border: none; color: var(--text-muted); padding: 15px 0; font-weight: bold; font-size: 0.95rem; cursor: pointer; transition: 0.3s; text-transform: uppercase; letter-spacing: 1px; }
+        .tab-btn.active { color: var(--accent-gold); border-bottom: 3px solid var(--accent-gold); background-color: var(--bg-card); }
+        .sidebar-content { flex: 1; overflow-y: auto; padding: 20px; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        .list-section-title { color: var(--text-muted); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; font-weight: bold; margin-bottom: 15px; margin-top: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; }
+        .list-item { background-color: var(--bg-darkest); padding: 15px; margin-bottom: 10px; border-radius: 8px; border-left: 4px solid var(--accent-gold); cursor: pointer; transition: all 0.2s ease; }
+        .list-item:hover { background-color: var(--border-color); transform: translateX(5px); }
+        .list-item h4 { color: #ffffff; font-size: 1rem; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
+        .list-item p { font-size: 0.85rem; color: var(--text-muted); }
+
+        .route-control { display: flex; flex-direction: column; gap: 12px; }
+        .route-control p { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 10px; line-height: 1.6; }
+        .route-control label { font-size: 0.85rem; color: var(--accent-gold); font-weight: bold; text-transform: uppercase; }
+        .route-control select { width: 100%; padding: 10px; background-color: var(--bg-darkest); color: var(--text-main); border: 1px solid var(--border-color); border-radius: 6px; outline: none; font-size: 0.95rem; }
+        .route-control select:focus { border-color: var(--accent-gold); }
+        
+        .route-control button { width: 100%; padding: 12px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.3s; font-size: 0.95rem; margin-top: 5px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn-primary { background-color: var(--accent-gold); color: var(--bg-darkest); }
+        .btn-primary:hover { background-color: var(--accent-hover); }
+        .btn-google { background-color: #3b82f6; color: #ffffff; }
+        .btn-google:hover { background-color: #2563eb; }
+        .btn-outline { background-color: transparent; color: var(--text-muted); border: 1px solid var(--border-color) !important; margin-top: 0; }
+        .btn-outline:hover { background-color: rgba(255, 255, 255, 0.05); }
+
+        #map { flex: 1; height: 100%; z-index: 1; }
+
+        .custom-div-icon { background: transparent; border: none; }
+        .marker-pin { width: 30px; height: 30px; border-radius: 50% 50% 50% 0; position: absolute; transform: rotate(-45deg); left: 50%; top: 50%; margin: -15px 0 0 -15px; }
+        .marker-icon { width: 20px; height: 20px; position: absolute; z-index: 1; left: 50%; top: 50%; margin: -10px 0 0 -10px; color: #ffffff; text-align: center; line-height: 20px; font-size: 12px; }
+        
+        .marker-fasilitas .marker-pin { background: #2563eb; border: 2px solid #ffffff; }
+        .marker-umkm .marker-pin { background: #dc2626; border: 2px solid #ffffff; }
+        .marker-current .marker-pin { background: #10b981; border: 2px solid #ffffff; box-shadow: 0 0 10px rgba(16, 185, 129, 0.8); } 
+
+        .leaflet-popup-content-wrapper { background: var(--bg-card); color: var(--text-main); border: 1px solid var(--accent-gold); border-radius: 8px; padding: 0; overflow: hidden; }
+        .leaflet-popup-tip { background: var(--bg-card); border: 1px solid var(--accent-gold); }
+        .leaflet-popup-content { margin: 0; min-width: 250px; }
+        
+        .popup-header { background-color: #020610; padding: 12px; border-bottom: 1px solid var(--border-color); }
+        .popup-header h3 { color: var(--accent-gold); font-size: 1.1rem; margin: 0; text-transform: uppercase; }
+        .popup-body { padding: 12px; font-size: 0.95rem; color: var(--text-main); line-height: 1.6; }
+        .popup-body strong { color: var(--accent-gold); }
+        
+        .popup-btn { display: block; width: calc(100% - 24px); margin: 0 12px 12px; padding: 10px; text-align: center; background-color: transparent; color: var(--accent-gold); text-decoration: none; font-weight: bold; border: 1px solid var(--accent-gold); border-radius: 6px; transition: 0.3s; font-size: 0.9rem; }
+        .popup-btn:hover { background-color: var(--accent-gold); color: var(--bg-darkest); }
+
+        .leaflet-routing-container { background-color: var(--bg-card) !important; color: var(--text-main) !important; border: 1px solid var(--accent-gold) !important; border-radius: 8px; font-size: 0.9rem; }
+        .leaflet-routing-alt { background-color: var(--bg-card) !important; color: var(--text-main) !important; }
+        .leaflet-routing-alt h2, .leaflet-routing-alt h3 { color: var(--accent-gold) !important; }
+        .leaflet-routing-icon { filter: invert(1); }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="nav-brand">
+            <!-- Tulisan WEBGIS INTERAKTIF sudah dihilangkan -->
+            <h1>DUSUN CETOK</h1>
+        </div>
+        <ul class="nav-links">
+            <!-- Hanya kembali ke beranda dengan gaya persis seperti referensi -->
+            <li>
+                <a href="beranda.html"><i class="fas fa-home"></i> Kembali ke Beranda</a>
+            </li>
+        </ul>
+    </nav>
+
+    <div class="main-container">
+        <div class="sidebar">
+            <div class="sidebar-tabs">
+                <button id="btn-tab-lokasi" class="tab-btn active" onclick="switchTab('lokasi')">Fasum & UMKM</button>
+                <button id="btn-tab-rute" class="tab-btn" onclick="switchTab('rute')"><i class="fas fa-route"></i> Rute</button>
+            </div>
+
+            <div class="sidebar-content">
+                <div id="tab-lokasi" class="tab-content active">
+                    <div class="list-section-title">Fasilitas Umum</div>
+                    <div id="list-fasilitas"></div>
+                    
+                    <div class="list-section-title">UMKM Warga</div>
+                    <div id="list-umkm"></div>
+                </div>
+
+                <div id="tab-rute" class="tab-content">
+                    <div class="route-control">
+                        <p>Navigasi rute otomatis antar-titik penting di wilayah Dusun Cetok.</p>
+                        
+                        <label>Titik Keberangkatan (Awal):</label>
+                        <select id="route-start">
+                            <option value="">-- Pilih Titik Awal --</option>
+                            <option value="current" style="font-weight:bold; color: #eab308;">📍 Gunakan Lokasi Terkini Saya</option>
+                        </select>
+
+                        <label style="margin-top: 5px;">Titik Destinasi (Tujuan):</label>
+                        <select id="route-end">
+                            <option value="">-- Pilih Tujuan --</option>
+                        </select>
+
+                        <button class="btn-primary" onclick="calculateRoute()"><i class="fas fa-location-arrow"></i> Mulai Petunjuk Rute</button>
+                        <button class="btn-google" onclick="openInGoogleMaps()"><i class="fas fa-map-marked-alt"></i> Buka di Google Maps</button>
+                        <button class="btn-outline" onclick="clearRoute()"><i class="fas fa-trash-alt"></i> Reset Jalur</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="map"></div>
+    </div>
+
+    <!-- Leaflet Javascript -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
+
+    <script>
+        const dataFasilitas = [
+            { id: 'f1', nama: "Masjid Nurul Huda", lat: -7.754248550461454, lng: 110.54761860223867, ikon: 'fa-mosque', desc: 'Fasilitas ibadah utama jamaah Dusun Cetok.' },
+            { id: 'f2', nama: "Bangsal Dusun Cetok", lat: -7.753701872464028, lng: 110.54714126435482, ikon: 'fa-users', desc: 'Pusat balai pertemuan warga dan kegiatan KKN.' },
+            { id: 'f3', nama: "TPA Nur Hidayah", lat: -7.7516393864289395, lng: 110.5492514401, ikon: 'fa-book-open', desc: 'Sarana pendidikan keagamaan anak-anak dusun.' }
+        ];
+
+        const dataUMKM = [
+            { id: 'u1', nama: "Gado-gado Busuji", lat: -7.752582, lng: 110.548936, ikon: 'fa-utensils', desc: 'Kuliner gado-gado segar produksi lokal.' },
+            { id: 'u2', nama: "Warung Sayur Bu Sunarni", lat: -7.751498, lng: 110.548334, ikon: 'fa-carrot', desc: 'Penyedia kebutuhan dapur pangan harian.' },
+            { id: 'u3', nama: "Warung Seblak Clowy", lat: -7.751477, lng: 110.548531, ikon: 'fa-fire', desc: 'Jajanan kontemporer favorit remaja.' },
+            { id: 'u4', nama: "Warung Kelontong Ibu Maryam", lat: -7.754786, lng: 110.547219, ikon: 'fa-shopping-basket', desc: 'Warung kebutuhan sembako rumah tangga.' },
+            { id: 'u5', nama: "TB. Estu Berkah Keramik", lat: -7.751181, lng: 110.54904, ikon: 'fa-warehouse', desc: 'Pusat bahan bangunan, granit, dan keramik.' },
+            { id: 'u6', nama: "Toko Kelontong Bu Menik", lat: -7.751364, lng: 110.549233, ikon: 'fa-store', desc: 'Menyediakan kelontong pangan lengkap.' },
+            { id: 'u7', nama: "Kapten Plastik 350 & Frozen", lat: -7.752053, lng: 110.549202, ikon: 'fa-ice-cream', desc: 'Distributor kebutuhan plastik dan makanan beku.' },
+            { id: 'u8', nama: "Toko & Agen Pos Semangat", lat: -7.752461, lng: 110.548537, ikon: 'fa-mail-bulk', desc: 'Loket pengiriman paket barang resmi pos.' },
+            { id: 'u9', nama: "Gito Roso Jenang Ayu", lat: -7.752697, lng: 110.548794, ikon: 'fa-box', desc: 'Produksi makanan tradisional oleh-oleh jenang.' },
+            { id: 'u10', nama: "Warung Jovanka", lat: -7.753054526, lng: 110.5480764, ikon: 'fa-hotdog', desc: 'Warung makan dan minuman ringan.' },
+            { id: 'u11', nama: "Angkringan Mbledos", lat: -7.75337, lng: 110.548383, ikon: 'fa-coffee', desc: 'Tempat berkumpul santai malam hari kuliner angkringan.' },
+            { id: 'u12', nama: "Waroeng BENmoro", lat: -7.753197, lng: 110.549439, ikon: 'fa-concierge-bell', desc: 'Jasa boga katering dan warung makan.' },
+            { id: 'u13', nama: "Angkringan Gembros", lat: -7.753684, lng: 110.549837, ikon: 'fa-cloud-moon', desc: 'Kuliner wedangan khas angkringan nusantara.' }
+        ];
+
+        let map, routingControl;
+        let markers = {};
+
+        document.addEventListener("DOMContentLoaded", function() {
+            map = L.map('map').setView([-7.753000, 110.548500], 17);
+
+            const satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+                maxZoom: 19, attribution: 'Tiles © Esri'
+            }).addTo(map);
+            const streets = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap' });
+
+            L.control.layers({"Citra Satelit": satellite, "Peta Jalan": streets}, null, { position: 'topright' }).addTo(map);
+
+            const createCustomIcon = (iconClass, typeClass) => {
+                return L.divIcon({
+                    className: 'custom-div-icon',
+                    html: `<div class="${typeClass}"><div class="marker-pin"></div><i class="fas ${iconClass} marker-icon"></i></div>`,
+                    iconSize: [30, 42], iconAnchor: [15, 42], popupAnchor: [0, -40]
+                });
+            };
+
+            const initLayersAndLists = () => {
+                const listFasilitas = document.getElementById('list-fasilitas');
+                const listUMKM = document.getElementById('list-umkm');
+                const selectStart = document.getElementById('route-start');
+                const selectEnd = document.getElementById('route-end');
+
+                dataFasilitas.forEach(item => {
+                    const m = L.marker([item.lat, item.lng], {icon: createCustomIcon(item.ikon, 'marker-fasilitas')}).addTo(map);
+                    m.bindPopup(`
+                        <div class="popup-header"><h3><i class="fas ${item.ikon}"></i> ${item.nama}</h3></div>
+                        <div class="popup-body"><p><strong>Kategori:</strong> Fasilitas Umum</p><p>${item.desc}</p></div>
+                        <a href="#" class="popup-btn" onclick="quickSelectRoute(${item.lat}, ${item.lng}); return false;"><i class="fas fa-route"></i> Jadikan Tujuan Rute</a>
+                    `);
+                    markers[item.id] = m;
+                    listFasilitas.innerHTML += `<div class="list-item" onclick="focusOnMap('${item.id}', ${item.lat}, ${item.lng})"><h4><i class="fas ${item.ikon}" style="color:var(--accent-gold)"></i> ${item.nama}</h4><p>Fasilitas Umum</p></div>`;
+                    
+                    const opt = `<option value="${item.lat},${item.lng}">${item.nama}</option>`;
+                    selectStart.innerHTML += opt; selectEnd.innerHTML += opt;
+                });
+
+                dataUMKM.forEach(item => {
+                    const m = L.marker([item.lat, item.lng], {icon: createCustomIcon(item.ikon, 'marker-umkm')}).addTo(map);
+                    m.bindPopup(`
+                        <div class="popup-header"><h3><i class="fas ${item.ikon}"></i> ${item.nama}</h3></div>
+                        <div class="popup-body"><p><strong>Kategori:</strong> UMKM Dusun Cetok</p><p>${item.desc}</p></div>
+                        <a href="#" class="popup-btn" onclick="quickSelectRoute(${item.lat}, ${item.lng}); return false;"><i class="fas fa-route"></i> Jadikan Tujuan Rute</a>
+                    `);
+                    markers[item.id] = m;
+                    listUMKM.innerHTML += `<div class="list-item" onclick="focusOnMap('${item.id}', ${item.lat}, ${item.lng})"><h4><i class="fas ${item.ikon}" style="color:var(--accent-gold)"></i> ${item.nama}</h4><p>Usaha Mikro Lokal</p></div>`;
+                    
+                    const opt = `<option value="${item.lat},${item.lng}">${item.nama}</option>`;
+                    selectStart.innerHTML += opt; selectEnd.innerHTML += opt;
+                });
+            };
+            initLayersAndLists();
+        });
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            if(tabId === 'lokasi') {
+                document.getElementById('btn-tab-lokasi').classList.add('active');
+                document.getElementById('tab-lokasi').classList.add('active');
+            } else {
+                document.getElementById('btn-tab-rute').classList.add('active');
+                document.getElementById('tab-rute').classList.add('active');
+            }
+        }
+
+        function focusOnMap(id, lat, lng) {
+            map.flyTo([lat, lng], 19, { animate: true, duration: 1.2 });
+            setTimeout(() => { markers[id].openPopup(); }, 1200);
+        }
+
+        function quickSelectRoute(lat, lng) {
+            switchTab('rute');
+            document.getElementById('route-end').value = `${lat},${lng}`;
+        }
+
+        function calculateRoute() {
+            const startPoint = document.getElementById('route-start').value;
+            const endPoint = document.getElementById('route-end').value;
+
+            if(!startPoint || !endPoint) { alert("Silakan tentukan Titik Awal dan Titik Tujuan rute Anda!"); return; }
+
+            if(startPoint === "current") {
+                if ("geolocation" in navigator) {
+                    alert("Sedang meminta akses lokasi Anda...");
+                    navigator.geolocation.getCurrentPosition(
+                        (position) => { drawRoutingEngine(position.coords.latitude, position.coords.longitude, endPoint); },
+                        (error) => { alert("Gagal mendapatkan lokasi. Pastikan GPS perangkat menyala dan Anda mengizinkan akses lokasi."); },
+                        { enableHighAccuracy: true }
+                    );
+                } else { alert("Browser Anda tidak mendukung fitur lokasi GPS."); }
+            } else {
+                const startCoords = startPoint.split(',');
+                drawRoutingEngine(startCoords[0], startCoords[1], endPoint);
+            }
+        }
+
+        function drawRoutingEngine(startLat, startLng, endPoint) {
+            const endCoords = endPoint.split(',');
+            clearRoute(); 
+
+            routingControl = L.Routing.control({
+                waypoints: [
+                    L.latLng(parseFloat(startLat), parseFloat(startLng)),
+                    L.latLng(parseFloat(endCoords[0]), parseFloat(endCoords[1]))
+                ],
+                routeWhileDragging: false, addWaypoints: false,
+                lineOptions: { styles: [{color: '#eab308', opacity: 0.9, weight: 6}] },
+                createMarker: function(i, wp, nWps) {
+                    if (i === 0 && document.getElementById('route-start').value === 'current') {
+                        return L.marker(wp.latLng, {
+                            icon: L.divIcon({
+                                className: 'custom-div-icon',
+                                html: `<div class="marker-current"><div class="marker-pin"></div><i class="fas fa-street-view marker-icon"></i></div>`,
+                                iconSize: [30, 42], iconAnchor: [15, 42], popupAnchor: [0, -40]
+                            })
+                        }).bindPopup("<b>📍 Lokasi Anda Saat Ini</b>");
+                    }
+                    return null;
+                }
+            }).addTo(map);
+        }
+
+        function clearRoute() {
+            if (routingControl) { map.removeControl(routingControl); routingControl = null; }
+        }
+
+        // FUNGSI GOOGLE MAPS YANG SUDAH DIPERBAIKI (Membaca GPS Langsung)
+        function openInGoogleMaps() {
+            const startPoint = document.getElementById('route-start').value;
+            const endPoint = document.getElementById('route-end').value;
+
+            if(!endPoint) { alert("Pilih Titik Tujuan terlebih dahulu!"); return; }
+
+            const endCoords = endPoint.split(',');
+            const destLat = endCoords[0];
+            const destLng = endCoords[1];
+
+            if(startPoint === "current") {
+                if ("geolocation" in navigator) {
+                    navigator.geolocation.getCurrentPosition(
+                        (position) => {
+                            const origLat = position.coords.latitude;
+                            const origLng = position.coords.longitude;
+                            let url = `https://www.google.com/maps/dir/?api=1&origin=${origLat},${origLng}&destination=${destLat},${destLng}`;
+                            window.open(url, '_blank');
+                        },
+                        (error) => {
+                            alert("Gagal mendapatkan lokasi GPS. Membuka maps dengan titik tujuan saja...");
+                            window.open(`https://www.google.com/maps/dir/?api=1&destination=${destLat},${destLng}`, '_blank');
+                        },
+                        { enableHighAccuracy: true }
+                    );
+                } else {
+                    window.open(`https://www.google.com/maps/dir/?api=1&destination=${destLat},${destLng}`, '_blank');
+                }
+            } else if (startPoint) {
+                const startCoords = startPoint.split(',');
+                let url = `https://www.google.com/maps/dir/?api=1&origin=${startCoords[0]},${startCoords[1]}&destination=${destLat},${destLng}`;
+                window.open(url, '_blank');
+            } else {
+                let url = `https://www.google.com/maps/dir/?api=1&destination=${destLat},${destLng}`;
+                window.open(url, '_blank');
+            }
+        }
+    </script>
+</body>
+</html>

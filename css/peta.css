@@ -1,0 +1,245 @@
+/* TEMA WARNA BERSAMA */
+:root {
+    --bg-darkest: #040d1a;  
+    --bg-card: #0a172a;     
+    --border-color: #1e293b;
+    --accent-gold: #eab308; 
+    --accent-hover: #ca8a04;
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background-color: var(--bg-darkest);
+    color: var(--text-main);
+    overflow: hidden; /* Mengunci scroll halaman */
+}
+
+/* --- NAVBAR ATAS --- */
+.navbar {
+    position: absolute;
+    top: 0;
+    width: 100%;
+    height: 70px;
+    background-color: rgba(4, 13, 26, 0.95);
+    backdrop-filter: blur(10px);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 40px;
+    z-index: 1000;
+    border-bottom: 2px solid var(--accent-gold);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+}
+
+.nav-brand h1 {
+    font-size: 1.5rem;
+    font-weight: 900;
+    letter-spacing: 2px;
+    color: #ffffff;
+    text-transform: uppercase;
+}
+
+.btn-kembali {
+    text-decoration: none;
+    color: var(--accent-gold);
+    font-weight: bold;
+    border: 2px solid var(--accent-gold);
+    padding: 8px 20px;
+    border-radius: 25px;
+    transition: 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-kembali:hover {
+    background-color: var(--accent-gold);
+    color: var(--bg-darkest);
+}
+
+/* --- WADAH PETA --- */
+#map-interaktif {
+    position: absolute;
+    top: 70px;
+    bottom: 0;
+    width: 100%;
+    z-index: 1;
+}
+
+/* --- CUSTOM LOGO MARKER --- */
+.marker-fasilitas {
+    background-color: var(--bg-card);
+    color: var(--accent-gold);
+    border: 2px solid var(--accent-gold);
+    border-radius: 50%;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.8);
+}
+
+.marker-umkm {
+    background-color: var(--accent-gold);
+    color: var(--bg-darkest);
+    border: 2px solid #ffffff;
+    border-radius: 50%;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.8);
+}
+
+/* --- POP UP STYLE PETA --- */
+.leaflet-popup-content-wrapper {
+    background-color: var(--bg-card) !important;
+    color: var(--text-main) !important;
+    border: 1px solid var(--accent-gold);
+    border-radius: 8px;
+}
+.leaflet-popup-tip {
+    background-color: var(--bg-card) !important;
+    border: 1px solid var(--accent-gold);
+    border-top: none;
+    border-left: none;
+}
+.popup-title {
+    font-weight: bold;
+    color: var(--accent-gold);
+    font-size: 1.1rem;
+    margin-bottom: 5px;
+}
+
+/* --- SIDEBAR RUTE --- */
+.sidebar-rute {
+    position: fixed;
+    top: 70px;
+    right: -400px;
+    width: 350px;
+    height: calc(100vh - 70px);
+    background-color: var(--bg-card);
+    border-left: 2px solid var(--accent-gold);
+    z-index: 2000;
+    transition: right 0.4s ease-in-out;
+    padding: 30px 25px;
+    box-shadow: -5px 0 20px rgba(0,0,0,0.7);
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar-rute.active {
+    right: 0;
+}
+
+.close-sidebar {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.close-sidebar:hover {
+    color: #ef4444;
+    transform: scale(1.1);
+}
+
+.sb-header {
+    color: var(--accent-gold);
+    font-size: 1.4rem;
+    font-weight: bold;
+    margin-bottom: 10px;
+    padding-right: 20px;
+    line-height: 1.3;
+}
+
+.sb-kategori {
+    display: inline-block;
+    background-color: rgba(234, 179, 8, 0.1);
+    color: var(--accent-gold);
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: bold;
+    margin-bottom: 25px;
+}
+
+.koordinat-box {
+    background-color: var(--bg-darkest);
+    border: 1px solid var(--border-color);
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 25px;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+.koordinat-box p {
+    margin-bottom: 5px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.koordinat-box p:last-child { margin-bottom: 0; }
+
+.desc-teks {
+    color: var(--text-main);
+    font-size: 0.95rem;
+    line-height: 1.6;
+    margin-bottom: auto;
+}
+
+/* TOMBOL GOOGLE MAPS */
+.btn-rute-maps {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background-color: var(--accent-gold);
+    color: var(--bg-darkest);
+    padding: 15px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 900;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    margin-top: 30px;
+}
+
+.btn-rute-maps:hover {
+    background-color: var(--accent-hover);
+    box-shadow: 0 0 20px rgba(234, 179, 8, 0.4);
+    transform: translateY(-2px);
+}
+
+/* KONTROL LAYER DI PETA */
+.leaflet-control-layers {
+    background-color: var(--bg-card) !important;
+    color: var(--text-main) !important;
+    border: 1px solid var(--accent-gold) !important;
+    border-radius: 8px !important;
+}
+
+@media (max-width: 768px) {
+    .navbar { padding: 0 15px; }
+    .nav-brand h1 { font-size: 1.1rem; }
+    .sidebar-rute { width: 100%; right: -100%; }
+}
